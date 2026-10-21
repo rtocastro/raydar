@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react'
 import { savePhoto, loadPhoto } from './photoStorage'
+import SunlightTimeline from './SunlightTimeline.jsx'
 import './App.css'
 
 function App() {
@@ -211,10 +212,10 @@ function App() {
                   </>
                 )}
 
-                <div className="sunlight-placeholder">
-                  <strong>☀️ Sunlight analysis</strong>
-                  <p>Not measured yet. Sky scanning is coming next.</p>
-                </div>
+                <SunlightTimeline
+                  key={selectedTarget.id}
+                  targetName={selectedTarget.name}
+                />
 
                 <button
                   className="delete-spot"

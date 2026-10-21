@@ -206,3 +206,136 @@ footer {
   color: #a33232;
   cursor: pointer;
 }
+
+
+.sun-report {
+  margin-top: 20px;
+  padding: 20px;
+  background: #ffffff;
+  border: 1px solid #dce8df;
+  border-radius: 16px;
+  color: #263b34;
+}
+
+.sun-report-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.sun-eyebrow {
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: #728b7b;
+  font-weight: 700;
+}
+
+.sun-report-heading h3 {
+  margin: 5px 0 0;
+}
+
+.sun-demo-badge {
+  background: #fff0c9;
+  color: #916200;
+  padding: 5px 9px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.sun-report label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.sun-report select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d0dfd4;
+  border-radius: 9px;
+  background: white;
+  color: #263b34;
+}
+
+.sun-total {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 18px;
+  padding: 18px;
+  background: #f6f8f2;
+  border-radius: 12px;
+}
+
+.sun-total strong {
+  font-size: 27px;
+  color: #178f65;
+}
+
+.sun-total small {
+  color: #708176;
+}
+
+.sun-report h4 {
+  margin: 22px 0 12px;
+}
+
+.sun-timeline {
+  position: relative;
+  height: 32px;
+  background: #dce5e9;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.sun-window {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: #f3bb3d;
+}
+
+.sun-time-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 10px;
+  color: #65766d;
+}
+
+.sun-window-list {
+  margin-top: 16px;
+}
+
+.sun-window-list p {
+  margin: 6px 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sun-disclaimer {
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid #e3e9e4;
+  color: #708176;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@media (max-width: 480px) {
+  .sun-report {
+    padding: 14px;
+  }
+
+  .sun-total strong {
+    font-size: 23px;
+  }
+
+  .sun-time-labels {
+    font-size: 9px;
+  }
+}
