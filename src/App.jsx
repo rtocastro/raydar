@@ -1,11 +1,27 @@
 
 import { useState, useEffect } from 'react'
+import { savePhoto, loadPhoto } from './photoStorage'
 import './App.css'
 
 function App() {
   const [photo, setPhoto] = useState(null)
-  const [targets, setTargets] = useState([])
+
+  const [targets, setTargets] = useState(() => {
+    try {
+      const saved = localStorage.getItem('raydar-targets')
+      return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
+  })
+
   const [selectedTargetId, setSelectedTargetId] = useState(null)
+
+
+  useEffect(() => {
+    localStorage.setItem('raydar-targets', JSON.stringify(targets))
+  }, [targets])
+
 
   useEffect(() => {
     return () => {
@@ -13,13 +29,48 @@ function App() {
     }
   }, [photo])
 
-  function uploadPhoto(event) {
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function restorePhoto() {
+      try {
+        const savedPhoto = await loadPhoto()
+
+        if (savedPhoto && !cancelled) {
+          setPhoto(URL.createObjectURL(savedPhoto))
+        }
+      } catch (error) {
+        console.error('Failed to restore photo:', error)
+      }
+    }
+
+    restorePhoto()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+
+
+  async function uploadPhoto(event) {
     const file = event.target.files?.[0]
+
     if (!file || !file.type.startsWith('image/')) return
 
-    setPhoto(URL.createObjectURL(file))
-    setTargets([])
+    try {
+      await savePhoto(file)
+
+      setPhoto(URL.createObjectURL(file))
+      setTargets([])
+      setSelectedTargetId(null)
+    } catch (error) {
+      console.error('Failed to save photo:', error)
+      alert('Could not save the photograph. Please try again.')
+    }
   }
+
 
 
   function addTarget(event) {
