@@ -1,21 +1,6 @@
 
-import { useState } from 'react'
-// import './SunlightTimeline.css'
-
-const DEMO_WINDOWS = {
-  0: [[12.5, 14]],
-  1: [[12, 14]],
-  2: [[11, 14.5]],
-  3: [[10, 12], [14, 16]],
-  4: [[10, 15]],
-  5: [[11, 16.5]],
-  6: [[11, 17]],
-  7: [[11, 16]],
-  8: [[12, 16]],
-  9: [[12, 14], [15, 17]],
-  10: [[12, 15]],
-  11: [[12.5, 14]]
-}
+import { useMemo, useState } from 'react'
+import { calculateDaylight, getSolarDay } from './solarEngine'
 
 const MONTHS = [
   'January', 'February', 'March', 'April',
@@ -23,87 +8,139 @@ const MONTHS = [
   'September', 'October', 'November', 'December'
 ]
 
-function formatTime(hour) {
-  const hours = Math.floor(hour)
-  const minutes = Math.round((hour - hours) * 60)
-  const period = hours >= 12 ? 'PM' : 'AM'
-  const displayHour = hours % 12 || 12
-
-  return `${displayHour}:${String(minutes).padStart(2, '0')} ${period}`
+function formatTime(date) {
+  return date.toLocaleTimeString([], {
+    hour: 'numeric',
+    minute: '2-digit'
+  })
 }
 
-export default function SunlightTimeline({ targetName }) {
+export default function SunlightTimeline({ targetName, location }) {
   const [month, setMonth] = useState(new Date().getMonth())
 
-  const windows = DEMO_WINDOWS[month]
-  const totalHours = windows.reduce(
-    (total, [start, end]) => total + (end - start),
-    0
-  )
+  const result = useMemo(() => {
+    if (!location) return null
+
+    const date = new Date(
+      new Date().getFullYear(),
+      month,
+      15,
+      12
+    )
+
+    const samples = calculateDaylight(
+      date,
+      location.latitude,
+      location.longitude
+    )
+
+    const solarDay = getSolarDay(
+      date,
+      location.latitude,
+      location.longitude
+    )
+
+    const daylightSamples = samples.filter(
+      sample => sample.aboveHorizon
+    )
+
+    return {
+      sunrise: solarDay.sunrise,
+      sunset: solarDay.sunset,
+      daylightHours: daylightSamples.length * (5 / 60),
+      samples
+    }
+  }, [month, location])
 
   return (
     <section className="sun-report">
       <div className="sun-report-heading">
         <div>
-          <span className="sun-eyebrow">RAYDAR · SUNLIGHT REPORT</span>
+          <span className="sun-eyebrow">
+            RAYDAR · SOLAR REPORT
+          </span>
           <h3>{targetName}</h3>
         </div>
-        <span className="sun-demo-badge">DEMO</span>
+        <span className="sun-demo-badge">
+          ASTRONOMICAL
+        </span>
       </div>
 
-      <label htmlFor="sun-month">Explore sunlight by month</label>
-      <select
-        id="sun-month"
-        value={month}
-        onChange={event => setMonth(Number(event.target.value))}
-      >
-        {MONTHS.map((name, index) => (
-          <option key={name} value={index}>{name}</option>
-        ))}
-      </select>
+      {!location ? (
+        <p className="sun-disclaimer">
+          Select your city above to calculate daylight.
+        </p>
+      ) : (
+        <>
+          <label htmlFor="sun-month">
+            Explore daylight by month
+          </label>
 
-      <div className="sun-total">
-        <span>☀️ Illustrative direct sunlight</span>
-        <strong>{totalHours.toFixed(1)} hours / day</strong>
-        <small>Example data — not a measurement of your garden</small>
-      </div>
+          <select
+            id="sun-month"
+            value={month}
+            onChange={event =>
+              setMonth(Number(event.target.value))
+            }
+          >
+            {MONTHS.map((name, index) => (
+              <option key={name} value={index}>
+                {name}
+              </option>
+            ))}
+          </select>
 
-      <h4>When sunlight reaches this spot</h4>
+          <div className="sun-total">
+            <span>☀️ Astronomical daylight</span>
+            <strong>
+              {result.daylightHours.toFixed(1)} hours
+            </strong>
+            <small>
+              Sun above the horizon — not direct sunlight
+              reaching your plants.
+            </small>
+          </div>
 
-      <div className="sun-timeline">
-        {windows.map(([start, end], index) => (
-          <div
-            key={index}
-            className="sun-window"
-            style={{
-              left: `${((start - 6) / 14) * 100}%`,
-              width: `${((end - start) / 14) * 100}%`
-            }}
-          />
-        ))}
-      </div>
+          <h4>Sunrise and sunset</h4>
 
-      <div className="sun-time-labels">
-        <span>6 AM</span>
-        <span>9 AM</span>
-        <span>12 PM</span>
-        <span>3 PM</span>
-        <span>6 PM</span>
-        <span>8 PM</span>
-      </div>
+          <div className="sun-window-list">
+            <p>🌅 Sunrise: {formatTime(result.sunrise)}</p>
+            <p>🌇 Sunset: {formatTime(result.sunset)}</p>
+          </div>
 
-      <div className="sun-window-list">
-        {windows.map(([start, end], index) => (
-          <p key={index}>
-            ☀️ {formatTime(start)} – {formatTime(end)}
+          <h4>Daylight timeline</h4>
+
+          <div className="sun-timeline">
+            {result.samples
+              .filter(sample => sample.aboveHorizon)
+              .map((sample, index) => (
+                <div
+                  key={index}
+                  className="sun-window"
+                  style={{
+                    left: `${(sample.hour / 24) * 100}%`,
+                    width: `${(5 / 60 / 24) * 100}%`
+                  }}
+                />
+              ))}
+          </div>
+
+          <div className="sun-time-labels">
+            <span>12 AM</span>
+            <span>6 AM</span>
+            <span>12 PM</span>
+            <span>6 PM</span>
+            <span>12 AM</span>
+          </div>
+
+          <p className="sun-disclaimer">
+            Calculated for {location.name} on the 15th of
+            {` ${MONTHS[month]}`}. Buildings, trees,
+            awnings, and other obstructions are not yet
+            included.
           </p>
-        ))}
-      </div>
-
-      <p className="sun-disclaimer">
-        These times are placeholders. Actual estimates will use your
-        location, solar position, and measured sky obstructions.
-      </p>
+        </>
+      )}
     </section>
   )
 }

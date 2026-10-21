@@ -339,3 +339,35 @@ footer {
     font-size: 9px;
   }
 }
+
+
+
+.location-selector {
+  padding: 18px;
+  margin-bottom: 24px;
+  background: #eef7f0;
+  border: 1px solid #d4e7d9;
+  border-radius: 14px;
+}
+
+.location-selector label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.location-selector select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cddbd1;
+  border-radius: 9px;
+  background: white;
+  color: #263b34;
+}
+
+.location-selector p {
+  font-size: 12px;
+  color: #63796b;
+  margin-bottom: 0;
+  line-height: 1.5;
+}

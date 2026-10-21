@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { savePhoto, loadPhoto } from './photoStorage'
 import SunlightTimeline from './SunlightTimeline.jsx'
+import LocationSelector from './LocationSelector'
 import './App.css'
 
 function App() {
@@ -17,7 +18,24 @@ function App() {
   })
 
   const [selectedTargetId, setSelectedTargetId] = useState(null)
+  const [location, setLocation] = useState(() => {
+    try {
+      const saved = localStorage.getItem('raydar-location')
+      return saved ? JSON.parse(saved) : null
+    } catch {
+      return null
+    }
+  })
 
+
+  useEffect(() => {
+    if (location) {
+      localStorage.setItem(
+        'raydar-location',
+        JSON.stringify(location)
+      )
+    }
+  }, [location])
 
   useEffect(() => {
     localStorage.setItem('raydar-targets', JSON.stringify(targets))
@@ -121,6 +139,10 @@ function App() {
       </header>
 
       <section className="workspace">
+        <LocationSelector
+          location={location}
+          onLocationChange={setLocation}
+        />
         <h2>Map your growing space</h2>
         <p>Upload a photo of your balcony, patio, or garden.</p>
 
@@ -215,6 +237,7 @@ function App() {
                 <SunlightTimeline
                   key={selectedTarget.id}
                   targetName={selectedTarget.name}
+                  location={location}
                 />
 
                 <button
