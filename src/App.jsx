@@ -5,6 +5,7 @@ import './App.css'
 function App() {
   const [photo, setPhoto] = useState(null)
   const [targets, setTargets] = useState([])
+  const [selectedTargetId, setSelectedTargetId] = useState(null)
 
   useEffect(() => {
     return () => {
@@ -20,17 +21,38 @@ function App() {
     setTargets([])
   }
 
+
   function addTarget(event) {
     const rect = event.currentTarget.getBoundingClientRect()
 
     const x = ((event.clientX - rect.left) / rect.width) * 100
     const y = ((event.clientY - rect.top) / rect.height) * 100
 
-    setTargets(previous => [
-      ...previous,
-      { id: crypto.randomUUID(), x, y }
-    ])
+    const newTarget = {
+      id: crypto.randomUUID(),
+      x,
+      y,
+      name: `Growing Spot ${targets.length + 1}`,
+      plant: '',
+      status: 'empty'
+    }
+
+    setTargets(previous => [...previous, newTarget])
+    setSelectedTargetId(newTarget.id)
   }
+
+  function updateTarget(id, updates) {
+    setTargets(previous =>
+      previous.map(target =>
+        target.id === id ? { ...target, ...updates } : target
+      )
+    )
+  }
+
+  const selectedTarget = targets.find(
+    target => target.id === selectedTargetId
+  )
+
 
   function removeTarget(id) {
     setTargets(previous => previous.filter(target => target.id !== id))
@@ -77,13 +99,84 @@ function App() {
                   title="Click to remove target"
                   onClick={(event) => {
                     event.stopPropagation()
-                    removeTarget(target.id)
+                    setSelectedTargetId(target.id)
                   }}
                 >
                   {index + 1}
                 </button>
               ))}
             </div>
+
+
+            {selectedTarget && (
+              <div className="spot-panel">
+                <div className="spot-panel-header">
+                  <h3>{selectedTarget.name}</h3>
+                  <button onClick={() => setSelectedTargetId(null)}>
+                    Close
+                  </button>
+                </div>
+
+                <label htmlFor="spot-name">Location name</label>
+                <input
+                  id="spot-name"
+                  type="text"
+                  value={selectedTarget.name}
+                  onChange={event =>
+                    updateTarget(selectedTarget.id, {
+                      name: event.target.value
+                    })
+                  }
+                />
+
+                <label htmlFor="spot-status">Location status</label>
+                <select
+                  id="spot-status"
+                  value={selectedTarget.status}
+                  onChange={event =>
+                    updateTarget(selectedTarget.id, {
+                      status: event.target.value
+                    })
+                  }
+                >
+                  <option value="empty">Available for planting</option>
+                  <option value="occupied">Already growing something</option>
+                </select>
+
+                {selectedTarget.status === 'occupied' && (
+                  <>
+                    <label htmlFor="spot-plant">Plant name</label>
+                    <input
+                      id="spot-plant"
+                      type="text"
+                      placeholder="e.g. Dragon Fruit"
+                      value={selectedTarget.plant}
+                      onChange={event =>
+                        updateTarget(selectedTarget.id, {
+                          plant: event.target.value
+                        })
+                      }
+                    />
+                  </>
+                )}
+
+                <div className="sunlight-placeholder">
+                  <strong>☀️ Sunlight analysis</strong>
+                  <p>Not measured yet. Sky scanning is coming next.</p>
+                </div>
+
+                <button
+                  className="delete-spot"
+                  onClick={() => {
+                    removeTarget(selectedTarget.id)
+                    setSelectedTargetId(null)
+                  }}
+                >
+                  Remove growing spot
+                </button>
+              </div>
+            )}
+
 
             <div className="target-info">
               <strong>{targets.length} growing spots marked</strong>
