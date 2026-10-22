@@ -259,6 +259,46 @@ function App() {
                 Clear targets
               </button>
             </div>
+
+            <div className="sky-scan-section">
+              <div className="sky-scan-heading">
+                <span>☀️ Sky Scan</span>
+                <small>Step 4 · Obstruction mapping</small>
+              </div>
+
+              <p>
+                Capture the sky from this growing spot to help
+                Raydar identify nearby buildings, trees, and awnings.
+              </p>
+
+              <label className="sky-scan-button">
+                📷 Add sky photo
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0]
+                    if (!file) return
+
+                    const imageUrl = URL.createObjectURL(file)
+                    updateTarget(selectedTarget.id, {
+                      skyPhoto: imageUrl
+                    })
+                  }}
+                  hidden
+                />
+              </label>
+
+              {selectedTarget.skyPhoto && (
+                <div className="sky-scan-preview">
+                  <img
+                    src={selectedTarget.skyPhoto}
+                    alt={`Sky view for ${selectedTarget.name}`}
+                  />
+                  <p>Sky photo attached — calibration coming next.</p>
+                </div>
+              )}
+            </div>
           </>
         )}
       </section>
