@@ -289,7 +289,7 @@ function App() {
                 />
               </label>
 
-              {selectedTarget.skyPhoto && (
+              {selectedTarget?.skyPhoto && (
                 <div className="sky-scan-preview">
                   <img
                     src={selectedTarget.skyPhoto}
