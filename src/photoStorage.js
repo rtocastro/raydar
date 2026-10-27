@@ -47,3 +47,39 @@ export function loadPhoto() {
     store.get('current-garden')
   )
 }
+
+export async function saveSkyPhoto(targetId, file) {
+  const db = await openDatabase()
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction('photos', 'readwrite')
+    const store = transaction.objectStore('photos')
+
+    store.put(file, `sky-${targetId}`)
+
+    transaction.oncomplete = () => {
+      db.close()
+      resolve()
+    }
+
+    transaction.onerror = () => {
+      db.close()
+      reject(transaction.error)
+    }
+  })
+}
+
+export async function loadSkyPhoto(targetId) {
+  const db = await openDatabase()
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction('photos', 'readonly')
+    const store = transaction.objectStore('photos')
+    const request = store.get(`sky-${targetId}`)
+
+    request.onsuccess = () => resolve(request.result ?? null)
+    request.onerror = () => reject(request.error)
+
+    transaction.oncomplete = () => db.close()
+  })
+}
