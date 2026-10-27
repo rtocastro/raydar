@@ -4,6 +4,7 @@ import { savePhoto, loadPhoto } from './photoStorage'
 import SunlightTimeline from './SunlightTimeline.jsx'
 import SkyScan from './SkyScan'
 import LocationSelector from './LocationSelector'
+import OrientationGuide from './OrientationGuide'
 import './App.css'
 
 function App() {
@@ -242,6 +243,8 @@ function App() {
                 />
 
                 <SkyScan key={selectedTarget.id} target={selectedTarget} />
+
+                <OrientationGuide />
 
 
                 <button
