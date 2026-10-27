@@ -566,3 +566,33 @@ footer {
   font-weight: 600;
   color: #187a50;
 }
+
+
+.scan-mode-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.scan-mode-buttons button {
+  padding: 12px 8px;
+  border: 1px solid #c8ded0;
+  border-radius: 10px;
+  background: white;
+  color: #285c43;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.scan-mode-buttons button.active {
+  background: #187a50;
+  border-color: #187a50;
+  color: white;
+}
+
+@media (max-width: 360px) {
+  .scan-mode-buttons {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,7 +1,27 @@
 
 import { useEffect, useState } from 'react'
 
+const MODES = {
+  horizon: {
+    label: 'Horizon',
+    description: 'Hold your phone upright to scan trees and buildings.',
+    targetBeta: 90
+  },
+  overhead: {
+    label: 'Overhead',
+    description: 'Hold your phone flat with the screen facing upward.',
+    targetBeta: 0
+  }
+}
+
+const TOLERANCE = 5
+
+function angleDifference(a, b) {
+  return ((a - b + 540) % 360) - 180
+}
+
 export default function OrientationGuide() {
+  const [mode, setMode] = useState('horizon')
   const [permission, setPermission] = useState('idle')
   const [tilt, setTilt] = useState({ beta: 0, gamma: 0 })
   const [hasReading, setHasReading] = useState(false)
@@ -22,10 +42,7 @@ export default function OrientationGuide() {
     window.addEventListener('deviceorientation', handleOrientation)
 
     return () => {
-      window.removeEventListener(
-        'deviceorientation',
-        handleOrientation
-      )
+      window.removeEventListener('deviceorientation', handleOrientation)
     }
   }, [permission])
 
@@ -39,35 +56,74 @@ export default function OrientationGuide() {
       if (
         typeof DeviceOrientationEvent.requestPermission === 'function'
       ) {
-        const result = await DeviceOrientationEvent.requestPermission()
-        setPermission(result === 'granted' ? 'granted' : 'denied')
+        const result =
+          await DeviceOrientationEvent.requestPermission()
+
+        setPermission(
+          result === 'granted' ? 'granted' : 'denied'
+        )
       } else {
         setPermission('granted')
       }
     } catch (error) {
-      console.error('Orientation permission failed:', error)
+      console.error('Sensor permission failed:', error)
       setPermission('denied')
     }
   }
 
-  const bubbleX = Math.max(-45, Math.min(45, tilt.gamma))
-  const bubbleY = Math.max(-45, Math.min(45, tilt.beta))
-  const isLevel =
+  const selectedMode = MODES[mode]
+
+  const betaDifference = angleDifference(
+    tilt.beta,
+    selectedMode.targetBeta
+  )
+
+  const gammaDifference = tilt.gamma
+
+  const bubbleX = Math.max(
+    -55,
+    Math.min(55, gammaDifference * 1.2)
+  )
+
+  const bubbleY = Math.max(
+    -55,
+    Math.min(55, betaDifference * 1.2)
+  )
+
+  const isAligned =
     hasReading &&
-    Math.abs(tilt.gamma) < 5 &&
-    Math.abs(tilt.beta) < 5
+    Math.abs(betaDifference) <= TOLERANCE &&
+    Math.abs(gammaDifference) <= TOLERANCE
 
   return (
     <section className="orientation-guide">
       <h3>🧭 Raydar Alignment Guide</h3>
 
-      <p>
-        Enable motion sensors, then gently tilt your phone
-        to test the bubble level.
-      </p>
+      <div className="scan-mode-buttons">
+        <button
+          type="button"
+          className={mode === 'horizon' ? 'active' : ''}
+          onClick={() => setMode('horizon')}
+        >
+          🌳 Horizon
+        </button>
+
+        <button
+          type="button"
+          className={mode === 'overhead' ? 'active' : ''}
+          onClick={() => setMode('overhead')}
+        >
+          ☀️ Overhead
+        </button>
+      </div>
+
+      <p>{selectedMode.description}</p>
 
       {permission !== 'granted' ? (
-        <button type="button" onClick={enableSensors}>
+        <button
+          type="button"
+          onClick={enableSensors}
+        >
           Enable motion sensors
         </button>
       ) : (
@@ -76,25 +132,29 @@ export default function OrientationGuide() {
             <div className="bubble-target" />
 
             <div
-              className={`bubble ${isLevel ? 'aligned' : ''}`}
+              className={`bubble ${isAligned ? 'aligned' : ''}`}
               style={{
                 transform: `translate(
-                  ${bubbleX * 1.2}px,
-                  ${bubbleY * 1.2}px
+                  ${bubbleX}px,
+                  ${bubbleY}px
                 )`
               }}
             />
           </div>
 
           <div className="orientation-readings">
-            <span>Forward/back: {tilt.beta.toFixed(1)}°</span>
-            <span>Left/right: {tilt.gamma.toFixed(1)}°</span>
+            <span>
+              Forward/back: {tilt.beta.toFixed(1)}°
+            </span>
+            <span>
+              Left/right: {tilt.gamma.toFixed(1)}°
+            </span>
           </div>
 
           <p className="orientation-status">
             {!hasReading
               ? 'Waiting for sensor data...'
-              : isLevel
+              : isAligned
                 ? '✅ Aligned! Hold steady.'
                 : 'Move your phone to center the bubble.'}
           </p>
@@ -106,7 +166,7 @@ export default function OrientationGuide() {
       )}
 
       {permission === 'unsupported' && (
-        <p>This browser does not support orientation sensors.</p>
+        <p>Orientation sensors are unavailable in this browser.</p>
       )}
     </section>
   )
