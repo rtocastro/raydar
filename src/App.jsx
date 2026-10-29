@@ -5,6 +5,7 @@ import SunlightTimeline from './SunlightTimeline.jsx'
 import SkyScan from './SkyScan'
 import LocationSelector from './LocationSelector'
 import OrientationGuide from './OrientationGuide'
+import CameraScanner from './CameraScanner'
 import './App.css'
 
 function App() {
@@ -245,6 +246,8 @@ function App() {
                 <SkyScan key={selectedTarget.id} target={selectedTarget} />
 
                 <OrientationGuide />
+
+                <CameraScanner />
 
 
                 <button

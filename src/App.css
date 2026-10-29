@@ -596,3 +596,77 @@ footer {
     grid-template-columns: 1fr;
   }
 }
+
+
+.camera-scanner {
+  margin-top: 20px;
+  padding: 20px;
+  background: #eef7f0;
+  border: 1px solid #d4e7d9;
+  border-radius: 14px;
+}
+
+.camera-scanner h3 {
+  margin-top: 0;
+}
+
+.camera-preview {
+  position: relative;
+  width: 100%;
+  min-height: 220px;
+  background: #20342b;
+  border-radius: 12px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.camera-preview video {
+  width: 100%;
+  height: auto;
+  max-height: 420px;
+  object-fit: contain;
+}
+
+.camera-placeholder {
+  color: white;
+  padding: 50px 15px;
+}
+
+.camera-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.camera-actions button {
+  padding: 11px 14px;
+  border: 1px solid #187a50;
+  background: #187a50;
+  color: white;
+  border-radius: 9px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.camera-actions button:last-child:not(:first-child) {
+  background: white;
+  color: #187a50;
+}
+
+.camera-capture {
+  margin-top: 18px;
+}
+
+.camera-capture img {
+  display: block;
+  width: 100%;
+  border-radius: 10px;
+}
+
+.camera-error {
+  color: #b42318;
+  font-size: 13px;
+}
+
