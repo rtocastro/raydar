@@ -12,6 +12,7 @@ export default function CameraScanner() {
     const [error, setError] = useState('')
     const [capturedPhoto, setCapturedPhoto] = useState(null)
     const [orientation, setOrientation] = useState(null)
+    const [mode, setMode] = useState('horizon')
 
     useEffect(() => {
         return () => {
@@ -97,6 +98,22 @@ export default function CameraScanner() {
         }, 'image/jpeg', 0.9)
     }
 
+    const targetBeta = mode === 'horizon' ? 90 : 0
+
+    const betaError = orientation
+        ? orientation.beta - targetBeta
+        : 0
+
+    const gammaError = orientation?.gamma ?? 0
+
+    const isAligned =
+        orientation !== null &&
+        Math.abs(betaError) <= 5 &&
+        Math.abs(gammaError) <= 5
+
+    const bubbleX = Math.max(-40, Math.min(40, gammaError * 1.2))
+    const bubbleY = Math.max(-40, Math.min(40, betaError * 1.2))
+
     return (
         <section className="camera-scanner">
             <h3>📷 Raydar Live Scanner</h3>
@@ -106,7 +123,11 @@ export default function CameraScanner() {
                 Rear camera is recommended for scanning surroundings.
             </p>
 
-            <OrientationGuide onOrientationChange={setOrientation} />
+            <OrientationGuide
+                mode={mode}
+                onModeChange={setMode}
+                onOrientationChange={setOrientation}
+            />
 
             <div className="camera-preview">
                 <video
@@ -120,21 +141,36 @@ export default function CameraScanner() {
                     }}
                 />
 
-                {active && orientation && (
+
+                {active && (
                     <div className="camera-alignment-overlay">
-                        <div className="camera-crosshair">
-                            <div
-                                className="camera-bubble"
-                                style={{
-                                    transform: `translate(
-            ${Math.max(-40, Math.min(40, orientation.gamma))}px,
-            ${Math.max(-40, Math.min(40, orientation.beta - 90))}px
-          )`
-                                }}
-                            />
+                        <div className="camera-status">
+                            {!orientation
+                                ? 'Enable motion sensors for alignment'
+                                : isAligned
+                                    ? '✓ Aligned — hold steady'
+                                    : 'Move your phone to center the bubble'}
+                        </div>
+
+                        {orientation && (
+                            <div className="camera-crosshair">
+                                <div
+                                    className={`camera-bubble ${isAligned ? 'aligned' : ''}`}
+                                    style={{
+                                        transform: `translate(${bubbleX}px, ${bubbleY}px)`
+                                    }}
+                                />
+                            </div>
+                        )}
+
+                        <div className="camera-angle-readings">
+                            {orientation
+                                ? `${orientation.beta.toFixed(1)}° tilt · ${orientation.gamma.toFixed(1)}° roll`
+                                : 'Orientation unavailable'}
                         </div>
                     </div>
                 )}
+
 
                 {!active && (
                     <p className="camera-placeholder">
@@ -172,8 +208,9 @@ export default function CameraScanner() {
                     <h4>Captured photo</h4>
                     <img src={capturedPhoto} alt="Captured sky scan" />
                     <p>
-                        Test capture only. Saving to your growing spot
-                        comes next.
+                        {mode === 'horizon'
+                            ? 'Hold your phone upright to scan trees and buildings.'
+                            : 'Hold your phone flat, screen facing upward, to scan overhead.'}
                     </p>
                 </div>
             )}
