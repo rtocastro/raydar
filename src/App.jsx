@@ -245,8 +245,6 @@ function App() {
 
                 <SkyScan key={selectedTarget.id} target={selectedTarget} />
 
-                <OrientationGuide />
-
                 <CameraScanner />
 
 
