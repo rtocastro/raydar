@@ -1,16 +1,17 @@
-
 import { useEffect, useRef, useState } from 'react'
-const [orientation, setOrientation] = useState(null)
 import OrientationGuide from './OrientationGuide'
+
 
 export default function CameraScanner() {
     const videoRef = useRef(null)
     const streamRef = useRef(null)
 
+
     const [camera, setCamera] = useState('environment')
     const [active, setActive] = useState(false)
     const [error, setError] = useState('')
     const [capturedPhoto, setCapturedPhoto] = useState(null)
+    const [orientation, setOrientation] = useState(null)
 
     useEffect(() => {
         return () => {
