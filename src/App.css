@@ -670,3 +670,51 @@ footer {
   font-size: 13px;
 }
 
+
+.camera-alignment-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.camera-crosshair {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.camera-crosshair::before,
+.camera-crosshair::after {
+  content: '';
+  position: absolute;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.camera-crosshair::before {
+  width: 1px;
+  height: 100%;
+  left: 50%;
+}
+
+.camera-crosshair::after {
+  height: 1px;
+  width: 100%;
+  top: 50%;
+}
+
+.camera-bubble {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  top: calc(50% - 12px);
+  left: calc(50% - 12px);
+  border-radius: 50%;
+  background: #b8eb54;
+  border: 2px solid #427d35;
+  transition: transform 0.08s ease-out;
+}
