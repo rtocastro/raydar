@@ -229,6 +229,26 @@ export default function CameraScanner({ targetId }) {
                             : 'Hold your phone flat, screen facing upward, to scan overhead.'}
                     </p>
                 </div>
+
+
+            )}
+
+            {captureMetadata && (
+                <div className="capture-metadata">
+                    <h4>Capture details</h4>
+                    <p>Mode: {captureMetadata.mode}</p>
+                    <p>Camera: {captureMetadata.camera}</p>
+                    <p>
+                        Tilt: {captureMetadata.orientation?.beta?.toFixed(1) ?? 'N/A'}°
+                    </p>
+                    <p>
+                        Roll: {captureMetadata.orientation?.gamma?.toFixed(1) ?? 'N/A'}°
+                    </p>
+                    <small>
+                        Sensor readings are uncalibrated. Compass direction
+                        has not yet been verified.
+                    </small>
+                </div>
             )}
         </section>
     )
