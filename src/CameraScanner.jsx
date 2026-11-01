@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import OrientationGuide from './OrientationGuide'
 
 
-export default function CameraScanner() {
+export default function CameraScanner({ targetId }) {
     const videoRef = useRef(null)
     const streamRef = useRef(null)
 
@@ -13,6 +13,7 @@ export default function CameraScanner() {
     const [capturedPhoto, setCapturedPhoto] = useState(null)
     const [orientation, setOrientation] = useState(null)
     const [mode, setMode] = useState('horizon')
+    const [captureMetadata, setCaptureMetadata] = useState(null)
 
     useEffect(() => {
         return () => {
@@ -95,7 +96,22 @@ export default function CameraScanner() {
 
             const url = URL.createObjectURL(blob)
             setCapturedPhoto(url)
+            setCaptureMetadata({
+                targetId,
+                mode,
+                camera,
+                capturedAt: new Date().toISOString(),
+                orientation: orientation
+                    ? {
+                        beta: orientation.beta,
+                        gamma: orientation.gamma,
+                        alpha: orientation.alpha ?? null
+                    }
+                    : null
+            })
         }, 'image/jpeg', 0.9)
+
+
     }
 
     const targetBeta = mode === 'horizon' ? 90 : 0

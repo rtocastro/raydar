@@ -245,7 +245,10 @@ function App() {
 
                 <SkyScan key={selectedTarget.id} target={selectedTarget} />
 
-                <CameraScanner />
+                <CameraScanner
+  key={selectedTarget.id}
+  targetId={selectedTarget.id}
+/>
 
 
                 <button
