@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import OrientationGuide from './OrientationGuide'
+import { saveScan, loadScans } from './photoStorage'
+import SavedScanImage from './SavedScanImage'
 
 
 export default function CameraScanner({ targetId }) {
@@ -14,6 +16,8 @@ export default function CameraScanner({ targetId }) {
     const [orientation, setOrientation] = useState(null)
     const [mode, setMode] = useState('horizon')
     const [captureMetadata, setCaptureMetadata] = useState(null)
+    const [savedScans, setSavedScans] = useState([])
+    const [savingScan, setSavingScan] = useState(false)
 
     useEffect(() => {
         return () => {
@@ -26,6 +30,25 @@ export default function CameraScanner({ targetId }) {
             if (capturedPhoto) URL.revokeObjectURL(capturedPhoto)
         }
     }, [capturedPhoto])
+
+    useEffect(() => {
+        let cancelled = false
+
+        async function restoreScans() {
+            try {
+                const scans = await loadScans(targetId)
+                if (!cancelled) setSavedScans(scans)
+            } catch (error) {
+                console.error('Could not load scans:', error)
+            }
+        }
+
+        restoreScans()
+
+        return () => {
+            cancelled = true
+        }
+    }, [targetId])
 
     async function startCamera(facingMode = camera) {
         setError('')
@@ -80,6 +103,7 @@ export default function CameraScanner({ targetId }) {
         await startCamera(next)
     }
 
+
     function capturePhoto() {
         const video = videoRef.current
         if (!video || !video.videoWidth) return
@@ -89,6 +113,8 @@ export default function CameraScanner({ targetId }) {
         canvas.height = video.videoHeight
 
         const context = canvas.getContext('2d')
+        if (!context) return
+
         context.drawImage(video, 0, 0)
 
         canvas.toBlob(blob => {
@@ -96,6 +122,7 @@ export default function CameraScanner({ targetId }) {
 
             const url = URL.createObjectURL(blob)
             setCapturedPhoto(url)
+
             setCaptureMetadata({
                 targetId,
                 mode,
@@ -110,9 +137,83 @@ export default function CameraScanner({ targetId }) {
                     : null
             })
         }, 'image/jpeg', 0.9)
-
-
     }
+
+
+    {
+        capturedPhoto && captureMetadata && (
+            <button
+                type="button"
+                disabled={savingScan}
+                onClick={async () => {
+                    setSavingScan(true)
+
+                    try {
+                        const response = await fetch(capturedPhoto)
+                        const blob = await response.blob()
+
+                        const scan = {
+                            id: crypto.randomUUID(),
+                            ...captureMetadata,
+                            image: blob
+                        }
+
+                        await saveScan(scan)
+
+                        setSavedScans(previous => [scan, ...previous])
+                        setCapturedPhoto(null)
+                        setCaptureMetadata(null)
+                    } catch (error) {
+                        console.error('Could not save scan:', error)
+                        alert('Could not save scan. Please try again.')
+                    } finally {
+                        setSavingScan(false)
+                    }
+                }}
+            >
+                {savingScan ? 'Saving...' : '💾 Save this scan'}
+            </button>
+        )
+    }
+
+
+    {
+        savedScans.length > 0 && (
+            <div className="saved-scans">
+                <h4>Saved scans ({savedScans.length})</h4>
+
+                {savedScans.map(scan => (
+                    <div key={scan.id} className="saved-scan-card">
+                        <img
+                            src={URL.createObjectURL(scan.image)}
+                            alt={`${scan.mode} scan`}
+                        />
+
+                        <div>
+                            <strong>
+                                {scan.mode === 'horizon'
+                                    ? '🌳 Horizon'
+                                    : '☀️ Overhead'}
+                            </strong>
+
+                            <p>
+                                {scan.camera === 'environment'
+                                    ? 'Rear camera'
+                                    : 'Front camera'}
+                            </p>
+
+                            <small>
+                                Tilt: {scan.orientation?.beta?.toFixed(1) ?? 'N/A'}°
+                            </small>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        )
+    }
+
+
+
 
     const targetBeta = mode === 'horizon' ? 90 : 0
 

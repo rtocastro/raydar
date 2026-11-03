@@ -83,3 +83,68 @@ export async function loadSkyPhoto(targetId) {
     transaction.oncomplete = () => db.close()
   })
 }
+
+
+export async function saveScan(scan) {
+  const db = await openDatabase()
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction('photos', 'readwrite')
+    const store = transaction.objectStore('photos')
+
+    store.put(scan, `scan-${scan.id}`)
+
+    transaction.oncomplete = () => {
+      db.close()
+      resolve()
+    }
+
+    transaction.onerror = () => {
+      db.close()
+      reject(transaction.error)
+    }
+  })
+}
+
+export async function loadScans(targetId) {
+  const db = await openDatabase()
+
+  return new Promise((resolve, reject) => {
+    const scans = []
+    const transaction = db.transaction('photos', 'readonly')
+    const store = transaction.objectStore('photos')
+
+    const request = store.openCursor()
+
+    request.onsuccess = () => {
+      const cursor = request.result
+
+      if (!cursor) return
+
+      if (
+        typeof cursor.key === 'string' &&
+        cursor.key.startsWith('scan-') &&
+        cursor.value?.targetId === targetId
+      ) {
+        scans.push(cursor.value)
+      }
+
+      cursor.continue()
+    }
+
+    transaction.oncomplete = () => {
+      db.close()
+      resolve(
+        scans.sort(
+          (a, b) =>
+            new Date(b.capturedAt) - new Date(a.capturedAt)
+        )
+      )
+    }
+
+    transaction.onerror = () => {
+      db.close()
+      reject(transaction.error)
+    }
+  })
+}
