@@ -140,78 +140,6 @@ export default function CameraScanner({ targetId }) {
     }
 
 
-    {
-        capturedPhoto && captureMetadata && (
-            <button
-                type="button"
-                disabled={savingScan}
-                onClick={async () => {
-                    setSavingScan(true)
-
-                    try {
-                        const response = await fetch(capturedPhoto)
-                        const blob = await response.blob()
-
-                        const scan = {
-                            id: crypto.randomUUID(),
-                            ...captureMetadata,
-                            image: blob
-                        }
-
-                        await saveScan(scan)
-
-                        setSavedScans(previous => [scan, ...previous])
-                        setCapturedPhoto(null)
-                        setCaptureMetadata(null)
-                    } catch (error) {
-                        console.error('Could not save scan:', error)
-                        alert('Could not save scan. Please try again.')
-                    } finally {
-                        setSavingScan(false)
-                    }
-                }}
-            >
-                {savingScan ? 'Saving...' : '💾 Save this scan'}
-            </button>
-        )
-    }
-
-
-    {
-        savedScans.length > 0 && (
-            <div className="saved-scans">
-                <h4>Saved scans ({savedScans.length})</h4>
-
-                {savedScans.map(scan => (
-                    <div key={scan.id} className="saved-scan-card">
-                        <img
-                            src={URL.createObjectURL(scan.image)}
-                            alt={`${scan.mode} scan`}
-                        />
-
-                        <div>
-                            <strong>
-                                {scan.mode === 'horizon'
-                                    ? '🌳 Horizon'
-                                    : '☀️ Overhead'}
-                            </strong>
-
-                            <p>
-                                {scan.camera === 'environment'
-                                    ? 'Rear camera'
-                                    : 'Front camera'}
-                            </p>
-
-                            <small>
-                                Tilt: {scan.orientation?.beta?.toFixed(1) ?? 'N/A'}°
-                            </small>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        )
-    }
-
 
 
 
@@ -351,6 +279,75 @@ export default function CameraScanner({ targetId }) {
                     </small>
                 </div>
             )}
+
+
+            {capturedPhoto && captureMetadata && (
+                <button
+                    type="button"
+                    disabled={savingScan}
+                    onClick={async () => {
+                        setSavingScan(true)
+
+                        try {
+                            const response = await fetch(capturedPhoto)
+                            const blob = await response.blob()
+
+                            const scan = {
+                                id: crypto.randomUUID(),
+                                ...captureMetadata,
+                                image: blob
+                            }
+
+                            await saveScan(scan)
+
+                            setSavedScans(previous => [scan, ...previous])
+                            setCapturedPhoto(null)
+                            setCaptureMetadata(null)
+                        } catch (error) {
+                            console.error('Could not save scan:', error)
+                            alert('Could not save scan. Please try again.')
+                        } finally {
+                            setSavingScan(false)
+                        }
+                    }}
+                >
+                    {savingScan ? 'Saving...' : '💾 Save this scan'}
+                </button>
+            )}
+
+            {savedScans.length > 0 && (
+                <div className="saved-scans">
+                    <h4>Saved scans ({savedScans.length})</h4>
+
+                    {savedScans.map(scan => (
+                        <div key={scan.id} className="saved-scan-card">
+                            <SavedScanImage
+                                blob={scan.image}
+                                alt={`${scan.mode} scan`}
+                            />
+
+                            <div>
+                                <strong>
+                                    {scan.mode === 'horizon'
+                                        ? '🌳 Horizon'
+                                        : '☀️ Overhead'}
+                                </strong>
+
+                                <p>
+                                    {scan.camera === 'environment'
+                                        ? 'Rear camera'
+                                        : 'Front camera'}
+                                </p>
+
+                                <small>
+                                    Tilt: {scan.orientation?.beta?.toFixed(1) ?? 'N/A'}°
+                                </small>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+
         </section>
     )
 }
