@@ -174,6 +174,39 @@ export default function CameraScanner({ targetId }) {
                 onOrientationChange={setOrientation}
             />
 
+
+            <div className="compass-diagnostic">
+                <h4>🧭 Compass Diagnostic</h4>
+
+                <p>
+                    Compass heading:{' '}
+                    {orientation?.compassHeading != null
+                        ? `${orientation.compassHeading.toFixed(1)}°`
+                        : 'Unavailable'}
+                </p>
+
+                <p>
+                    Compass accuracy:{' '}
+                    {orientation?.compassAccuracy != null &&
+                        orientation.compassAccuracy >= 0
+                        ? `±${orientation.compassAccuracy.toFixed(1)}°`
+                        : 'Unavailable'}
+                </p>
+
+                <p>
+                    Alpha: {orientation?.alpha != null
+                        ? `${orientation.alpha.toFixed(1)}°`
+                        : 'Unavailable'}
+                </p>
+
+                <p>
+                    Absolute orientation: {
+                        orientation?.absolute ? 'Yes' : 'No / unknown'
+                    }
+                </p>
+            </div>
+
+
             <div className="camera-preview">
                 <video
                     ref={videoRef}
