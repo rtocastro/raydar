@@ -818,3 +818,20 @@ footer {
 .saved-scan-card small {
   color: #668575;
 }
+
+.absolute-diagnostic {
+  margin: 12px 0;
+  padding: 12px;
+  background: #eef7ef;
+  border: 1px solid #c8dfcd;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+.absolute-diagnostic h4 {
+  margin: 0 0 8px;
+}
+
+.absolute-diagnostic p {
+  margin: 4px 0;
+}
